@@ -1,12 +1,12 @@
 <template>
-  <section class="text-gray-600 body-font overflow-hidden">
-    <div class="container px-5 py-24 mx-auto">
+  <section class="text-gray-600 body-font">
+    <div class="container px-5 py-8 mx-auto w-full">
       
       <button @click="makePDF" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 my-4 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg my-8">Generate PDF</button>
       
       <h2 class="text-4xl font-bold m-4 p-4">{{heading}}</h2>
 
-      <table class="min-w-max w-full table-auto my-4 overflow-visible">
+      <table class="table-auto my-4">
           <thead>
               <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                   <th class="py-3 px-6 text-left">Heading</th>
@@ -16,7 +16,7 @@
           <tbody class="text-gray-600 text-sm font-light">
               <tr v-for="(item,i) in items" :key="i" class="border-b border-gray-200 hover:bg-gray-100">
                   <td class="py-3 px-6 text-left whitespace-nowrap"> {{ item.title}}</td>
-                  <td class="py-3 px-6 text-left whitespace-nowrap"> {{ item.body}}</td>
+                  <td class="py-3 px-6 text-left overflow-x-visible"> {{ item.body}}</td>
               </tr>
           </tbody>
       </table>
