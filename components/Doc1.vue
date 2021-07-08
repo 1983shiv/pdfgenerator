@@ -3,8 +3,8 @@
     <div class="container px-5 py-8 mx-auto w-full">
       <!-- makeZip -->
       <div class="inline-flex text-center justify-center">
-      <button @click="makePDF" class="flex ml-4 text-white bg-indigo-500 border-0 py-2 my-4 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg my-8">Generate PDF</button>
-      <button @click="makeZip" class="flex ml-4 text-white bg-indigo-500 border-0 py-2 my-4 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg my-8">Generate Zip</button>
+      <button class="flex ml-4 text-white bg-indigo-500 border-0 py-2 my-4 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg my-8">Generate PDF</button>
+      <button class="flex ml-4 text-white bg-indigo-500 border-0 py-2 my-4 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg my-8">Generate Zip</button>
       </div>
       <h2 class="text-4xl font-bold m-4 p-4">{{heading}}</h2>
 
@@ -65,62 +65,7 @@ export default ({
     };
   },
   methods: {
-    async makePDF(){
-      const columns = [
-        { title: "Heading", dataKey: "title" },
-        { title: "Remarks", dataKey: "body" }
-      ];
-      const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "in",
-        format: "letter"
-      });
-      
-      doc.text(this.heading, 0.5, 0.8, { align: "left" });
-      doc.autoTable({
-        columns,
-        body: this.items,
-        margin: { left: 0.5, top: 1.25 }
-      });
-      doc.text(this.moreText, 0.5, 9.0, { align: "left" });
-      // doc.autoTable({ html: '#document' })
-      doc.addPage()
-      doc.text(this.moreText2, 0.5, 1.0, { align: "left", maxWidth: "7.5" });
-      doc.save(`${this.heading}.pdf`);
-    },
-    async makeZip(){
-        // Create a new PDFDocument
-        const pdfDoc = await PDFDocument.create()
-
-        // Embed the Times Roman font
-        const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
-
-        // Add a blank page to the document
-        const page = pdfDoc.addPage()
-
-        // Get the width and height of the page
-        const { width, height } = page.getSize()
-
-        // Draw a string of text toward the top of the page
-        // const fontSize = 30
-        // const form = pdfDoc.getForm()
-
-        page.drawText(`${this.heading}`, { x: 50, y: height - 40, size: 20, maxWidth: 500 })
-
-        page.drawText(`${this.moreText}`, { x: 50, y: height - 80, size: 20, maxWidth: 500 })
-
-        page.drawText(`${this.moreText2}`, { x: 50, y: height - 240, size: 20, maxWidth: 500 })
-
-        // Serialize the PDFDocument to bytes (a Uint8Array)
-        const pdfBytes = await pdfDoc.save()
-
-        const zip = new JSZip();
-        zip.file(`${this.heading}.pdf`, pdfBytes);
-        zip.generateAsync({type:"blob"}).then(function(pdfBytes) {
-            // see FileSaver.js
-            saveAs(pdfBytes, "example.zip");
-        });
-    },
+    
   },
 })
 </script>
