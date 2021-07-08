@@ -30,12 +30,6 @@
 </template>
 
 <script>
-import jsPDF from 'jspdf'
-import 'jspdf-autotable'
-import JSZip from 'jszip'
-import FileSaver from "file-saver";
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
- 
 
 export default ({
   name: "docPrint",  
