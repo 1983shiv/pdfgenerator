@@ -1,9 +1,11 @@
 <template>
   <section class="text-gray-600 body-font">
     <div class="container px-5 py-8 mx-auto w-full">
-      
-      <button @click="makePDF" class="flex mx-auto text-white bg-indigo-500 border-0 py-2 my-4 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg my-8">Generate PDF</button>
-      
+      <!-- makeZip -->
+      <div class="inline-flex text-center justify-center">
+      <button @click="makePDF" class="flex ml-4 text-white bg-indigo-500 border-0 py-2 my-4 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg my-8">Generate PDF</button>
+      <button @click="makeZip" class="flex ml-4 text-white bg-indigo-500 border-0 py-2 my-4 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg my-8">Generate Zip</button>
+      </div>
       <h2 class="text-4xl font-bold m-4 p-4">{{heading}}</h2>
 
       <table class="table-auto my-4">
@@ -28,10 +30,12 @@
 </template>
 
 <script>
-// import html2canvas from 'html2canvas'
-
 import jsPDF from 'jspdf'
 import 'jspdf-autotable'
+import JSZip from 'jszip'
+import FileSaver from "file-saver";
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+ 
 
 export default ({
   name: "docPrint",  
@@ -61,14 +65,7 @@ export default ({
     };
   },
   methods: {
-    makePDF(){
-      // window.html2canvas = html2canvas;
-      // var doc = new jsPDF("p", "pt", "a4");
-      // doc.html(document.querySelector("#document"), {
-      //   callback: function(pdf){
-      //     pdf.save("mydoc.pdf");
-      //   }
-      // })
+    async makePDF(){
       const columns = [
         { title: "Heading", dataKey: "title" },
         { title: "Remarks", dataKey: "body" }
@@ -90,8 +87,96 @@ export default ({
       doc.addPage()
       doc.text(this.moreText2, 0.5, 1.0, { align: "left", maxWidth: "7.5" });
       doc.save(`${this.heading}.pdf`);
+    },
+    async makeZip(){
+        // Create a new PDFDocument
+        const pdfDoc = await PDFDocument.create()
 
-    }
+        // Embed the Times Roman font
+        const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+
+        // Add a blank page to the document
+        const page = pdfDoc.addPage()
+
+        // Get the width and height of the page
+        const { width, height } = page.getSize()
+
+        // Draw a string of text toward the top of the page
+        const fontSize = 30
+        const form = pdfDoc.getForm()
+
+        page.drawText('Enter your favorite superhero:', { x: 50, y: 700, size: 20 })
+
+        const superheroField = form.createTextField('favorite.superhero')
+        superheroField.setText('One Punch Man')
+        superheroField.addToPage(page, { x: 55, y: 640 })
+
+        page.drawText('Select your favorite rocket:', { x: 50, y: 600, size: 20 })
+
+        page.drawText('Falcon Heavy', { x: 120, y: 560, size: 18 })
+        page.drawText('Saturn IV', { x: 120, y: 500, size: 18 })
+        page.drawText('Delta IV Heavy', { x: 340, y: 560, size: 18 })
+        page.drawText('Space Launch System', { x: 340, y: 500, size: 18 })
+
+        const rocketField = form.createRadioGroup('favorite.rocket')
+        rocketField.addOptionToPage('Falcon Heavy', page, { x: 55, y: 540 })
+        rocketField.addOptionToPage('Saturn IV', page, { x: 55, y: 480 })
+        rocketField.addOptionToPage('Delta IV Heavy', page, { x: 275, y: 540 })
+        rocketField.addOptionToPage('Space Launch System', page, { x: 275, y: 480 })
+        rocketField.select('Saturn IV')
+
+        page.drawText('Select your favorite gundams:', { x: 50, y: 440, size: 20 })
+
+        page.drawText('Exia', { x: 120, y: 400, size: 18 })
+        page.drawText('Kyrios', { x: 120, y: 340, size: 18 })
+        page.drawText('Virtue', { x: 340, y: 400, size: 18 })
+        page.drawText('Dynames', { x: 340, y: 340, size: 18 })
+
+        const exiaField = form.createCheckBox('gundam.exia')
+        const kyriosField = form.createCheckBox('gundam.kyrios')
+        const virtueField = form.createCheckBox('gundam.virtue')
+        const dynamesField = form.createCheckBox('gundam.dynames')
+
+        exiaField.addToPage(page, { x: 55, y: 380 })
+        kyriosField.addToPage(page, { x: 55, y: 320 })
+        virtueField.addToPage(page, { x: 275, y: 380 })
+        dynamesField.addToPage(page, { x: 275, y: 320 })
+
+        exiaField.check()
+        dynamesField.check()
+
+        page.drawText('Select your favorite planet*:', { x: 50, y: 280, size: 20 })
+
+        const planetsField = form.createDropdown('favorite.planet')
+        planetsField.addOptions(['Venus', 'Earth', 'Mars', 'Pluto'])
+        planetsField.select('Pluto')
+        planetsField.addToPage(page, { x: 55, y: 220 })
+
+        page.drawText('Select your favorite person:', { x: 50, y: 180, size: 18 })
+
+        const personField = form.createOptionList('favorite.person')
+        personField.addOptions([
+          'Julius Caesar',
+          'Ada Lovelace',
+          'Cleopatra',
+          'Aaron Burr',
+          'Mark Antony',
+        ])
+        personField.select('Ada Lovelace')
+        personField.addToPage(page, { x: 55, y: 70 })
+
+        page.drawText(`* Pluto should be a planet too!`, { x: 15, y: 15, size: 15 })
+
+        // Serialize the PDFDocument to bytes (a Uint8Array)
+        const pdfBytes = await pdfDoc.save()
+
+        const zip = new JSZip();
+        zip.file(`${this.heading}.pdf`, pdfBytes);
+        zip.generateAsync({type:"blob"}).then(function(pdfBytes) {
+            // see FileSaver.js
+            saveAs(pdfBytes, "example.zip");
+        });
+    },
   },
 })
 </script>
